@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Recipe, Ingredient, Tag, Favorite, TagRecipe, IngredientRecipe, ShoppingList
+from .models import (Recipe, Ingredient, Tag, Favorite,
+                     TagRecipe, IngredientRecipe, ShoppingList
+                     )
 from users.models import User, Follow
 
 
@@ -26,8 +28,10 @@ class IngredientRecipeInline(admin.TabularInline):
 
 
 class RecipeAdmin(admin.ModelAdmin):
+
     def total_in_favorites(self, obj):
         return obj.favorites.count()
+
     readonly_fields = ('total_in_favorites',)
     list_display = ('name', 'author')
     search_fields = ('author', 'name', 'tags',)

@@ -1,26 +1,27 @@
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404, HttpResponse
-
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from django_filters.rest_framework import DjangoFilterBackend
-
-from recipes.models import Recipe, Ingredient, Tag, IngredientRecipe, TagRecipe, Favorite, ShoppingList
-from .serializers import (CreateRecipeSerializer, TagSerializer, IngredientSerializer,
-                          GetRecipeSerializer, FavoriteSerializer, ShoppingListSerializer)
+from foodgram.settings import FILE_NAME, CONTENT_TYPE
 from users.serializers import RecipeInfoSerializer
-from .permissions import IsAuthorOrReadOnly
-from .filters import CustomFilter
+from recipes.models import (Recipe, Ingredient, Tag, IngredientRecipe,
+                            TagRecipe, Favorite, ShoppingList)
+from api.serializers import (CreateRecipeSerializer, TagSerializer, IngredientSerializer,
+                          GetRecipeSerializer, FavoriteSerializer, ShoppingListSerializer)
+from api.permissions import IsAuthorOrReadOnly
+from api.filters import CustomFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """ Создать/обновить/удалить получить рецепт или получить список рецептов. """
     queryset = Recipe.objects.all()
     pagination_class = PageNumberPagination
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = CustomFilter
     permission_classes = (IsAuthorOrReadOnly,)
 
@@ -30,11 +31,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return GetRecipeSerializer
 
     def create_object(self, model, request, pk):
-        if model.objects.filter(user=self.request.user, recipe__id=pk).exists():
-            return Response(
-                {'errors': 'Рецепт уже добавлен'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         recipe = get_object_or_404(Recipe, id=pk)
         model.objects.create(user=self.request.user, recipe=recipe)
         serializer = RecipeInfoSerializer(recipe, context={'request': request})
@@ -73,9 +69,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return self.create_object(ShoppingList, request, pk)
         return self.delete_object(ShoppingList, pk)
 
-
     @action(
-        methods=['GET'],
         detail=False,
         url_path='download_shopping_cart'
     )
@@ -83,23 +77,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
         shopping_cart = {}
         ingredients = IngredientRecipe.objects.filter(
             recipe__shoppinglist__user=request.user
-        )
+        ).annotate(total_amount=Sum('amount'))
         for ingredient in ingredients:
-            amount = ingredient.amount
+            total_amount = ingredient.total_amount
             name = ingredient.ingredient.name
             measurement_unit = ingredient.ingredient.measurement_unit
-            if name not in shopping_cart:
-                shopping_cart[name] = {
-                    'measurement_unit': measurement_unit,
-                    'amount': amount
-                }
-            else:
-                shopping_cart[name]['amount'] += amount
-        main_list = ([f"{item}: {value['amount']}"
+            shopping_cart[name] = {
+                'measurement_unit': measurement_unit,
+                'total_amount': total_amount
+            }
+        main_list = ([f"{item}: {value['total_amount']}"
                       f"{value['measurement_unit']}\n"
                       for item, value in shopping_cart.items()])
-        response = HttpResponse(main_list, 'Content-Type: text/plain')
-        response['Content-Disposition'] = 'attachment; filename="BuyList.txt"'
+        response = HttpResponse(main_list, content_type=CONTENT_TYPE)
+        response['Content-Disposition'] = f'attachment; filename={FILE_NAME}'
         return response
 
 

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from .models import User, Follow
 from recipes.models import Recipe
@@ -23,13 +24,13 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ('user', 'following', 'id')
-        validators = (
-            serializers.UniqueTogetherValidator(
+        validators = [
+            UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
-                fields=('user', 'following'),
+                fields=['user', 'following'],
                 message='Вы уже подписаны на этого автора.'
-            ),
-        )
+            )
+        ]
 
     def validate(self, data):
         if self.context['request'].user == data['following']:

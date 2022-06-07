@@ -1,9 +1,11 @@
+from django.core.validators import MinValueValidator
+from django.db import transaction
+from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
+
 from drf_base64.fields import Base64ImageField
 
-from django.core.validators import MinValueValidator
-
-from rest_framework import serializers
-
+from foodgram.settings import LIMIT_VALUE
 from users.serializers import UserSerializer
 from recipes.models import (Recipe, Ingredient, Tag,
                             IngredientRecipe, TagRecipe,
@@ -44,24 +46,28 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     ingredients = ChooseIngredientsForRecipeSerializer(many=True, source='recipeingredient')
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
     author = serializers.SlugRelatedField(read_only=True, slug_field='email')
-    image = Base64ImageField()
+    image = Base64ImageField(required=False)
     cooking_time = serializers.IntegerField(
         validators=(
             MinValueValidator(
-                limit_value=1,
-                message=f'Время приготовления не может быть меньше 1 минуты'
+                limit_value=LIMIT_VALUE,
+                message=f'Время приготовления не может быть меньше {LIMIT_VALUE} минут'),
             ),
         )
-    )
 
     class Meta:
         model = Recipe
-        fields = ('id', 'author', 'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time')
+        fields = ('id', 'author', 'ingredients', 'tags',
+                  'image', 'name', 'text', 'cooking_time')
 
     def to_representation(self, instance):
-        serializer = GetRecipeSerializer(instance, context={'request': self.context.get('request')})
+        serializer = GetRecipeSerializer(
+            instance,
+            context={'request': self.context.get('request')}
+        )
         return serializer.data
 
+    @transaction.atomic()
     def create(self, validated_data):
         current_user = self.context.get('request').user
         tags = validated_data.pop('tags')
@@ -84,6 +90,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             )
         return recipe
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('recipeingredient')
@@ -114,8 +121,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 class GetRecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer()
     image = Base64ImageField()
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField(
+        method_name='get_is_favorited'
+    )
+    is_in_shopping_cart = serializers.SerializerMethodField(
+        method_name='get_is_in_shopping_cart'
+    )
     tags = TagSerializer(many=True, read_only=True)
     ingredients = GetIngredientsForRecipeSerializer(
         many=True,
@@ -131,13 +142,19 @@ class GetRecipeSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         if self.context.get('request').user.is_authenticated:
             user = self.context.get('request').user
-            return Favorite.objects.filter(user=user, recipe=obj).exists()
+            return Favorite.objects.filter(
+                user=user,
+                recipe=obj
+            ).exists()
         return False
 
     def get_is_in_shopping_cart(self, obj):
         if self.context.get('request').user.is_authenticated:
             user = self.context.get('request').user
-            return ShoppingList.objects.filter(user=user, recipe=obj).exists()
+            return ShoppingList.objects.filter(
+                user=user,
+                recipe=obj
+            ).exists()
         return False
 
 
@@ -149,7 +166,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = ('user', 'recipe')
         validators = (
-            serializers.UniqueTogetherValidator(
+            UniqueTogetherValidator(
                 queryset=Favorite.objects.all(),
                 fields=('user', 'recipe'),
                 message='Выбранный рецепт уже в списке избранного.'
@@ -165,7 +182,7 @@ class ShoppingListSerializer(serializers.ModelSerializer):
         model = ShoppingList
         fields = ('user', 'recipe')
         validators = (
-            serializers.UniqueTogetherValidator(
+            UniqueTogetherValidator(
                 queryset=ShoppingList.objects.all(),
                 fields=('user', 'recipe'),
                 message='Выбранный рецепт уже в списке покупок.'

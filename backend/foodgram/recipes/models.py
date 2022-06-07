@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 
 from users.models import User
+from foodgram.settings import LIMIT_VALUE
 
 
 class Tag(models.Model):
@@ -31,7 +32,7 @@ class Tag(models.Model):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
-        return f'{self.name}'
+        return self.name
 
 
 class Ingredient(models.Model):
@@ -101,7 +102,7 @@ class Recipe(models.Model):
         validators=(
             MinValueValidator(
                 1,
-                message='Минимальное время приготовления: 1 минута'),
+                message=f'Минимальное время приготовления: {LIMIT_VALUE} минут'),
         ),
     )
 
@@ -109,6 +110,12 @@ class Recipe(models.Model):
         ordering = ('-pk',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'id'],
+                name='unique_recipes'
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -174,12 +181,12 @@ class Favorite(models.Model):
 
     class Meta:
         ordering = ('-pk',)
-        constraints = (
+        constraints = [
             models.UniqueConstraint(
-                fields=('user', 'recipe'),
+                fields=['user', 'recipe'],
                 name='unique_favorites'
-            ),
-        )
+            )
+        ]
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
 

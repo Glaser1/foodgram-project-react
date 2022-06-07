@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 from djoser.views import UserViewSet
+from django.shortcuts import get_object_or_404
 
 from .models import User, Follow
 from .serializers import FollowSerializer, UserSerializer, SubscribeResponseSerializer
@@ -28,18 +29,16 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, id):
         """ Позволяет подписаться на выбранного пользователя или отписаться от него. """
         user = self.request.user
-        following = User.objects.get(id=id)
+        following = get_object_or_404(User, id=id)
         if request.method == 'POST':
             serializer = FollowSerializer(
                 data={'following': following.id},
                 context={'request': request}
             )
-            if serializer.is_valid():
-                serializer.save(user=user)
-                serializer = SubscribeResponseSerializer(following, context={'request': request})
-                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user)
+            serializer = SubscribeResponseSerializer(following, context={'request': request})
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         follow = Follow.objects.filter(user=request.user, following=following)
         if follow.exists():
             follow.delete()
