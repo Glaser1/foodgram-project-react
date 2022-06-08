@@ -137,5 +137,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LIMIT_VALUE = 1
 
-FILE_NAME = 'BuyList.txt'
+FILE_NAME = 'ShoppingCart.txt'
 CONTENT_TYPE = 'text/plain'

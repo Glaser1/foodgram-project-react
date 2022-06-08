@@ -12,7 +12,7 @@ from users.serializers import RecipeInfoSerializer
 from recipes.models import (Recipe, Ingredient, Tag, IngredientRecipe,
                             TagRecipe, Favorite, ShoppingList)
 from api.serializers import (CreateRecipeSerializer, TagSerializer, IngredientSerializer,
-                          GetRecipeSerializer, FavoriteSerializer, ShoppingListSerializer)
+                             GetRecipeSerializer, FavoriteSerializer, ShoppingListSerializer)
 from api.permissions import IsAuthorOrReadOnly
 from api.filters import CustomFilter
 
@@ -74,23 +74,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path='download_shopping_cart'
     )
     def download_shopping_cart(self, request):
-        shopping_cart = {}
-        ingredients = IngredientRecipe.objects.filter(
-            recipe__shoppinglist__user=request.user
-        ).annotate(total_amount=Sum('amount'))
-        for ingredient in ingredients:
-            total_amount = ingredient.total_amount
-            name = ingredient.ingredient.name
-            measurement_unit = ingredient.ingredient.measurement_unit
-            shopping_cart[name] = {
-                'measurement_unit': measurement_unit,
-                'total_amount': total_amount
-            }
-        main_list = ([f"{item}: {value['total_amount']}"
-                      f"{value['measurement_unit']}\n"
-                      for item, value in shopping_cart.items()])
-        response = HttpResponse(main_list, content_type=CONTENT_TYPE)
-        response['Content-Disposition'] = f'attachment; filename={FILE_NAME}'
+        ingredients = Recipe.objects.prefetch_related(
+            'ingredients', 'recipeingredient'
+        ).filter(shoppinglist__user=request.user
+        ).order_by('ingredients__name'
+        ).values('ingredients__name', 'ingredients__measurement_unit'
+        ).annotate(total_sum=Sum('recipeingredient__amount')
+        )
+
+        ingredient_txt = [
+            (
+                f"{item['ingredients__name']}: "
+                f"{item['total_sum']}{item['ingredients__measurement_unit']}\n"
+            )
+            for item in ingredients
+        ]
+        filename = FILE_NAME
+        response = HttpResponse(ingredient_txt, content_type=CONTENT_TYPE)
+        response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
 
 
