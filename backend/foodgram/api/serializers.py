@@ -2,7 +2,6 @@ from django.core.validators import MinValueValidator
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-
 from drf_base64.fields import Base64ImageField
 
 from foodgram.settings import LIMIT_VALUE
@@ -25,7 +24,9 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class ChooseIngredientsForRecipeSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all()
+    )
 
     class Meta:
         model = IngredientRecipe
@@ -35,7 +36,9 @@ class ChooseIngredientsForRecipeSerializer(serializers.ModelSerializer):
 class GetIngredientsForRecipeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='ingredient.id')
     name = serializers.CharField(source='ingredient.name')
-    measurement_unit = serializers.CharField(source='ingredient.measurement_unit')
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit'
+    )
 
     class Meta:
         model = IngredientRecipe
@@ -43,15 +46,21 @@ class GetIngredientsForRecipeSerializer(serializers.ModelSerializer):
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
-    ingredients = ChooseIngredientsForRecipeSerializer(many=True, source='recipeingredient')
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+    ingredients = ChooseIngredientsForRecipeSerializer(
+        many=True,
+        source='recipeingredient'
+    )
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True
+    )
     author = serializers.SlugRelatedField(read_only=True, slug_field='email')
     image = Base64ImageField(required=False)
     cooking_time = serializers.IntegerField(
         validators=(
             MinValueValidator(
                 limit_value=LIMIT_VALUE,
-                message=f'Время приготовления не может быть меньше {LIMIT_VALUE} минут'),
+                message=f'Минимальное время приготовления {LIMIT_VALUE} м.'),
             ),
         )
 

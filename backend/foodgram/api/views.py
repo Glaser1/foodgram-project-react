@@ -9,16 +9,17 @@ from rest_framework.decorators import action
 
 from foodgram.settings import FILE_NAME, CONTENT_TYPE
 from users.serializers import RecipeInfoSerializer
-from recipes.models import (Recipe, Ingredient, Tag, IngredientRecipe,
-                            TagRecipe, Favorite, ShoppingList)
-from api.serializers import (CreateRecipeSerializer, TagSerializer, IngredientSerializer,
-                             GetRecipeSerializer, FavoriteSerializer, ShoppingListSerializer)
+from recipes.models import (Recipe, Ingredient, Tag, Favorite, ShoppingList)
+from api.serializers import (CreateRecipeSerializer, TagSerializer,
+                             IngredientSerializer,
+                             GetRecipeSerializer, FavoriteSerializer,
+                             ShoppingListSerializer)
 from api.permissions import IsAuthorOrReadOnly
 from api.filters import CustomFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    """ Создать/обновить/удалить получить рецепт или получить список рецептов. """
+    """ CRUD операции с рецептом/списком рецептов. """
     queryset = Recipe.objects.all()
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)

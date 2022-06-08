@@ -1,23 +1,21 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
-
-
 from djoser.views import UserViewSet
-from django.shortcuts import get_object_or_404
 
 from .models import User, Follow
-from .serializers import FollowSerializer, UserSerializer, SubscribeResponseSerializer
+from .serializers import (FollowSerializer, UserSerializer,
+                          SubscribeResponseSerializer)
 
 
 class CustomUserViewSet(UserViewSet):
-    """Позволяет создать/подписаться на пользователя и получить список пользователей. """
+    """ CRUD операции с пользователями. """
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
     permission_classes = (AllowAny,)
-
 
     @action(
         methods=['POST', 'DELETE'],
@@ -27,7 +25,7 @@ class CustomUserViewSet(UserViewSet):
 
     )
     def subscribe(self, request, id):
-        """ Позволяет подписаться на выбранного пользователя или отписаться от него. """
+        """ Подписка/отписка на выбранного пользователя. """
         user = self.request.user
         following = get_object_or_404(User, id=id)
         if request.method == 'POST':
@@ -37,13 +35,25 @@ class CustomUserViewSet(UserViewSet):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save(user=user)
-            serializer = SubscribeResponseSerializer(following, context={'request': request})
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            serializer = SubscribeResponseSerializer(
+                following,
+                context={'request': request}
+            )
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_201_CREATED
+            )
         follow = Follow.objects.filter(user=request.user, following=following)
         if follow.exists():
             follow.delete()
-            return Response({'message': 'Подписка отменена.'}, status=status.HTTP_204_NO_CONTENT)
-        return Response({'errors': 'Вы не подписаны на этого автора.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'message': 'Подписка отменена.'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        return Response(
+            {'errors': 'Вы не подписаны на этого автора.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     @action(
         detail=False,
@@ -51,7 +61,7 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
-        """ Возвращает пользователей, на которого подписан текущий пользователь. """
+        """ Возвращает подписки текущего пользователя. """
         user = request.user
         subscriptions = User.objects.filter(following__user=user)
         subscriptions = self.paginate_queryset(subscriptions)
