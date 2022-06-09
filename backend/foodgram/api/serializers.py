@@ -1,14 +1,13 @@
 from django.core.validators import MinValueValidator
 from django.db import transaction
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 from drf_base64.fields import Base64ImageField
 
-from foodgram.settings import LIMIT_VALUE
+from foodgram.settings import MIN_COOKING_TIME, MIN_INGREDIENT_AMOUNT
 from users.serializers import UserSerializer
-from recipes.models import (Recipe, Ingredient, Tag,
-                            IngredientRecipe, TagRecipe,
-                            Favorite, ShoppingList)
+from recipes.models import (Recipe, Ingredient, Tag, IngredientRecipe,
+                            TagRecipe, Favorite, ShoppingList)
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -18,6 +17,15 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        max_length=30,
+        validators=(UniqueValidator(queryset=Tag.objects.all()),)
+    )
+    slug = serializers.SlugField(
+        max_length=200,
+        validators=(UniqueValidator(queryset=Tag.objects.all()),)
+    )
+
     class Meta:
         model = Tag
         fields = ('id', 'name', 'slug', 'color')
@@ -26,6 +34,15 @@ class TagSerializer(serializers.ModelSerializer):
 class ChooseIngredientsForRecipeSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all()
+    )
+    amount = serializers.IntegerField(
+        validators=(
+            MinValueValidator(
+                limit_value=MIN_INGREDIENT_AMOUNT,
+                message=(f'Минимальное количество ингредиента:'
+                         f'{MIN_INGREDIENT_AMOUNT}')
+            ),
+        )
     )
 
     class Meta:
@@ -59,8 +76,9 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     cooking_time = serializers.IntegerField(
         validators=(
             MinValueValidator(
-                limit_value=LIMIT_VALUE,
-                message=f'Минимальное время приготовления {LIMIT_VALUE} м.'),
+                limit_value=MIN_COOKING_TIME,
+                message=f'Минимальное время приготовления '
+                        f'{MIN_COOKING_TIME} минут'),
             ),
         )
 

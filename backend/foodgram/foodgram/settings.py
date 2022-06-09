@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = os.getenv('DEBUG')
+DEBUG = bool(os.getenv('DEBUG'))
 
 ALLOWED_HOSTS = ['*']
 
@@ -136,7 +136,8 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LIMIT_VALUE = 1
+MIN_COOKING_TIME = 1
+MIN_INGREDIENT_AMOUNT = 1
 
 FILE_NAME = 'ShoppingCart.txt'
 CONTENT_TYPE = 'text/plain'

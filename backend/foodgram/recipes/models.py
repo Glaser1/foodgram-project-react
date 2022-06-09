@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 
 from users.models import User
-from foodgram.settings import LIMIT_VALUE
+from foodgram.settings import MIN_COOKING_TIME, MIN_INGREDIENT_AMOUNT
 
 
 class Tag(models.Model):
@@ -102,7 +102,8 @@ class Recipe(models.Model):
         validators=(
             MinValueValidator(
                 1,
-                message=f'Минимальное время приготовления: {LIMIT_VALUE} м.'),
+                message=f'Минимальное время приготовления: '
+                        f'{MIN_COOKING_TIME} минут'),
         ),
     )
 
@@ -110,12 +111,12 @@ class Recipe(models.Model):
         ordering = ('-pk',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
-                fields=['author', 'id'],
+                fields=('author', 'id'),
                 name='unique_recipes'
-            )
-        ]
+            ),
+        )
 
     def __str__(self):
         return self.name
@@ -139,6 +140,13 @@ class IngredientRecipe(models.Model):
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
         help_text='Укажите количество',
+        validators=(
+            MinValueValidator(
+                1,
+                message=(f'Минимальное количества ингредиента:'
+                         f'{MIN_INGREDIENT_AMOUNT}')
+            ),
+        )
     )
 
     class Meta:
@@ -181,12 +189,12 @@ class Favorite(models.Model):
 
     class Meta:
         ordering = ('-pk',)
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
+                fields=('user', 'recipe'),
                 name='unique_favorites'
-            )
-        ]
+            ),
+        )
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
 

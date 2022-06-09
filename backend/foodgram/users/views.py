@@ -6,9 +6,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from djoser.views import UserViewSet
 
-from .models import User, Follow
-from .serializers import (FollowSerializer, UserSerializer,
-                          SubscribeResponseSerializer)
+from users.models import User, Follow
+from users.serializers import (FollowSerializer, UserSerializer,
+                               SubscribeResponseSerializer)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -18,7 +18,7 @@ class CustomUserViewSet(UserViewSet):
     permission_classes = (AllowAny,)
 
     @action(
-        methods=['POST', 'DELETE'],
+        methods=('POST', 'DELETE'),
         detail=True,
         url_path='subscribe',
         permission_classes=(IsAuthenticated,),

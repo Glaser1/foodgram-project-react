@@ -48,7 +48,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     @action(
-        methods=['POST', 'DELETE'],
+        methods=('POST', 'DELETE'),
         detail=True,
         url_path='favorite',
         permission_classes=(IsAuthenticated,)
@@ -59,7 +59,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return self.delete_object(Favorite, pk)
 
     @action(
-        methods=['POST', 'DELETE'],
+        methods=('POST', 'DELETE'),
         detail=True,
         url_path='shopping_cart',
         permission_classes=(IsAuthenticated,)
