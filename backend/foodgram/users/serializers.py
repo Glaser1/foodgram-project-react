@@ -43,11 +43,11 @@ class FollowSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         max_length=150,
-        validators=UniqueValidator(queryset=User.objects.all(),)
+        validators=(UniqueValidator(queryset=User.objects.all()),)
     )
     email = serializers.EmailField(
         max_length=50,
-        validators=UniqueValidator(queryset=User.objects.all(),)
+        validators=(UniqueValidator(queryset=User.objects.all()),)
     )
     is_subscribed = serializers.SerializerMethodField()
 
