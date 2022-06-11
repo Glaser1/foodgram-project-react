@@ -107,7 +107,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """ Возвращает ингредиент или список ингредиентов. """
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (CustomSearchFilter,)
+    filter_backends = (CustomSearchFilter, DjangoFilterBackend)
     search_fields = ('^name',)
     pagination_class = None
 
