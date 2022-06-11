@@ -15,7 +15,7 @@ from api.serializers import (CreateRecipeSerializer, TagSerializer,
                              GetRecipeSerializer, FavoriteSerializer,
                              ShoppingListSerializer)
 from api.permissions import IsAuthorOrReadOnly
-from api.filters import CustomFilter
+from api.filters import CustomFilter, CustomSearchFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -107,7 +107,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """ Возвращает ингредиент или список ингредиентов. """
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (CustomSearchFilter,)
     search_fields = ('^name',)
     pagination_class = None
 
