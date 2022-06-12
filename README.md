@@ -25,6 +25,7 @@
     https://docs.docker.com/engine/install/    
     https://docs.docker.com/compose/install/
 * Перейдите в папку infra репозитория с помощью команды cd infra;
+* Создайте файл .env - в нем укажите переменные окружающей среды согласно шаблону выше
 
 * Запустите приложения в контейнерах с помощью команды docker-compose up -d --build
 * Выполните миграцию в контейнерах: 
