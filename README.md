@@ -26,11 +26,15 @@
     https://docs.docker.com/compose/install/
 * Перейдите в папку infra репозитория с помощью команды cd infra;
 
-* Запустите приложения в контейнерах с помощью команды docker-compose up
+* Запустите приложения в контейнерах с помощью команды docker-compose up -d --build
 * Выполните миграцию в контейнерах: 
 
-  ``` docker-compose exec-web python manage.py makemigrations ```
+  ``` docker-compose exec web python manage.py makemigrations ```
   
-  ``` docker-compose exec-web python manage.py migrate ```
+  ``` docker-compose exec web python manage.py migrate ```
+* Создайте суперпользователя Django:
+  ``` docker-compose exec web python manage.py createsuperuser
+* Соберите статику:
+  ``` docker-compose exec web python manage.py collectstatic --no-input ```
 
 
