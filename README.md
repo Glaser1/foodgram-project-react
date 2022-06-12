@@ -18,32 +18,13 @@
 ``` DEBUG=True/False # Включить/отключить режим отладки ```
 
 ## Установка:
-* Клонируйте репозиторий себе на компьютер;
-* Перейдите в папку infra с помощью команды cd infra;
-* Установите docker и docker-compose (для Linux/MacOS):
-  ``` sudo apt install curl ```
-  
-  ``` curl -fsSL https://get.docker.com -o get-docker.sh ```
-
-  ``` sh get-docker.sh ```
-  
-  ``` sudo apt remove docker docker-engine docker.io containerd runc ```
-  
-  ``` sudo apt update  ```
-  
-  ``` sudo apt install \
-        apt-transport-https \
-        ca-certificates \
-        curl \
-        gnupg-agent \
-        software-properties-common -y ```
-        
-   ``` curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - ```
-   
-   ``` sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" ```
-   ``` sudo apt update  ```
-   
-   ``` sudo apt install docker-ce docker-compose -y ```
+* Зайдите на ваш удаленный сервер;
+* Клонируйте репозиторий себе на удаленный сервер:
+  ``` git clone git@github.com:Glaser1/foodgram-project-react.git ```
+* Установите docker и docker-compose по официальной инструкции (в зависимости от операционной системы сервера):
+    https://docs.docker.com/engine/install/    
+    https://docs.docker.com/compose/install/
+* Перейдите в папку infra репозитория с помощью команды cd infra;
 
 * Запустите приложения в контейнерах с помощью команды docker-compose up
 * Выполните миграцию в контейнерах: 
