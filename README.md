@@ -28,6 +28,7 @@
     https://docs.docker.com/engine/install/    
     https://docs.docker.com/compose/install/
 * Перейдите в папку infra репозитория с помощью команды cd infra;
+* В файле nginx.conf отредактируйте строку server_name: укажите IP-адрес вашего сервера
 * Создайте файл .env - в нем укажите переменные окружающей среды согласно шаблону выше
 
 * Запустите приложения в контейнерах с помощью команды docker-compose up -d --build
@@ -44,6 +45,6 @@
   ``` docker-compose exec web python manage.py collectstatic --no-input ```
 * Загрузите предустановленный список ингредиентов в базу данных:
   ``` docker-compose exec web python manage.py load_data ```
-
+* Проект будет доступен по публичному IP вашего сервера
 
 
