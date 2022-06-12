@@ -151,6 +151,11 @@ class IngredientRecipe(models.Model):
 
     class Meta:
         ordering = ('-pk',)
+        verbose_name = 'Ингредиент рецептов'
+        verbose_name_plural = 'Ингредиенты рецептов'
+
+    def __str__(self):
+        return self.recipe.name
 
 
 class TagRecipe(models.Model):
@@ -169,6 +174,11 @@ class TagRecipe(models.Model):
 
     class Meta:
         ordering = ('-pk',)
+        verbose_name = 'Тег рецептов'
+        verbose_name_plural = 'Теги рецептов'
+
+    def __str__(self):
+        return self.recipe.name
 
 
 class Favorite(models.Model):

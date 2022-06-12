@@ -35,8 +35,8 @@ class RecipeAdmin(admin.ModelAdmin):
 
     readonly_fields = ('total_in_favorites',)
     list_display = ('name', 'author')
-    search_fields = ('author', 'name', 'tags',)
-    list_filter = ('author__username', 'name', 'tags')
+    search_fields = ('author__username', 'author__email', 'name',)
+    list_filter = ('tags',)
     empty_value_display = '-empty-'
     inlines = (IngredientRecipeInline, TagRecipeInline)
 
@@ -44,7 +44,7 @@ class RecipeAdmin(admin.ModelAdmin):
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
     search_fields = ('name',)
-    list_filter = ('name',)
+    list_filter = ('measurement_unit',)
     empty_value_display = '-empty-'
     inlines = (IngredientRecipeInline,)
 
@@ -59,20 +59,24 @@ class TagAdmin(admin.ModelAdmin):
 
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('pk', 'recipe', 'user')
+    search_fields = ('recipe__name',     'user__username', 'user__email')
+    list_filter = ('recipe__tags__name',)
     empty_value_display = '-empty-'
 
 
 class ShoppingListAdmin(admin.ModelAdmin):
     list_display = ('pk', 'recipe', 'user')
+    search_fields = ('recipe__name', 'user__username', 'user__email')
     empty_value_display = '-empty-'
 
 
 class IngredientRecipeAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ('recipe__name', 'ingredient__name')
 
 
 class TagRecipeAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ('tag__name', 'recipe__name')
+    list_filter = ('tag',)
 
 
 admin.site.register(Recipe, RecipeAdmin)
