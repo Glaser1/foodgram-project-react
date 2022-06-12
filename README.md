@@ -22,6 +22,7 @@
 ## Установка:
 * Зайдите на ваш удаленный сервер;
 * Клонируйте репозиторий себе на удаленный сервер:
+
   ``` git clone git@github.com:Glaser1/foodgram-project-react.git ```
 * Установите docker и docker-compose согласно официальной инструкции (в зависимости от операционной системы сервера):
     https://docs.docker.com/engine/install/    
@@ -41,5 +42,8 @@
 * Соберите статику:
 
   ``` docker-compose exec web python manage.py collectstatic --no-input ```
+* Загрузите предустановленный список ингредиентов в базу данных:
+  ``` docker-compose exec web python manage.py load_data ```
+
 
 
