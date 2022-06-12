@@ -23,7 +23,7 @@
 * Зайдите на ваш удаленный сервер;
 * Клонируйте репозиторий себе на удаленный сервер:
   ``` git clone git@github.com:Glaser1/foodgram-project-react.git ```
-* Установите docker и docker-compose по официальной инструкции (в зависимости от операционной системы сервера):
+* Установите docker и docker-compose согласно официальной инструкции (в зависимости от операционной системы сервера):
     https://docs.docker.com/engine/install/    
     https://docs.docker.com/compose/install/
 * Перейдите в папку infra репозитория с помощью команды cd infra;
