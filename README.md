@@ -36,8 +36,10 @@
   
   ``` docker-compose exec web python manage.py migrate ```
 * Создайте суперпользователя Django:
+
   ``` docker-compose exec web python manage.py createsuperuser ```
 * Соберите статику:
+
   ``` docker-compose exec web python manage.py collectstatic --no-input ```
 
 
