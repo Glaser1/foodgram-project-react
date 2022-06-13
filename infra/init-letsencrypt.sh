@@ -5,7 +5,7 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=(foodgram-project.ddns.net www.foodgram-project.ddns.net)
+domains=(foodgram-project.ddns.net 51.250.108.12)
 rsa_key_size=4096
 data_path="./data/certbot"
 email="sashapliskov@gmail.com" # Adding a valid address is strongly recommended
